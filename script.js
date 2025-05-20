@@ -25,6 +25,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
   io.observe(container);
 });
-
-
-//change into typescript 
