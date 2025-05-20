@@ -19,57 +19,53 @@ html, body {
   overflow: hidden;
   border: 1px solid #444;
   position: relative;
-  filter: brightness(0.5);
-  transition: filter 0.4s ease;
+  /* Hover state now default */
+  filter: brightness(1);
 }
 
-.diagram-container.hovered {
-  filter: brightness(1);  /* Full brightness on hover */
-}
-
-/* 
-   All big boxes:
-   - 24px corner radius
-   - overflow: hidden
-   - background #1c1c1c
-   - default border: 1px #444
-*/
-.left-box, .center-box, .right-box {
+/* All big boxes: gradient border as default */
+.left-box,
+.center-box,
+.right-box {
   border-radius: 24px;
-  background: #1c1c1c;
+  /* inner fill + outer gradient border */
+  background-image:
+    linear-gradient(#1c1c1c, #1c1c1c),
+    linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #444;
-  transition: border 0.4s ease;
+  border: 2px solid transparent;
 }
 
-/* Text inside the small square */
+/* Default fill for SVG paths inside left-box */
+.left-box svg path {
+  fill: url(#hoverGradientIcon) !important;
+}
+
+/* Text inside the small square with gradient by default */
 .icon-label {
   margin-bottom: -10px;
-  margin-top: 1px; /* Space between the SVG and the text */
-  font-size: 12px; /* Adjust font size */
-  letter-spacing: -0.3px;  /* Spacing between the text */
-  color: #A5A5A5A5;      /* Match the design */
-  text-align: center;
-  transition: all 0.4s ease;
-}
-
-/* Change the text color when the entire container is hovered */
-.diagram-container.hovered .icon-label {
+  margin-top: 1px;
+  font-size: 12px;
+  letter-spacing: -0.3px;
   background: linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-align: center;
 }
 
-/* Left box: 295×295, 2×2 grid inside */
+/* Left-box: 295×295; contains a 2×2 grid */
 .left-box {
+  position: relative;
   left: 50px;
   width: 295px;
   height: 295px;
-  position: relative;
 }
+
 .inner-grid {
   display: grid;
   grid-template-columns: repeat(2, 108px);
@@ -79,49 +75,32 @@ html, body {
   align-content: center;
 }
 
-/* The small squares in left/right boxes */
+/* Small squares with gradient border as default */
 .small-square {
   width: 108px;
   height: 108px;
-  /* Always keep a 2px border so there's no layout shift */
-  border: 2px solid transparent; 
-  box-sizing: border-box;  /* So the border doesn’t change total box size */
+  border: 2px solid transparent;
+  box-sizing: border-box;
   border-radius: 24px;
-  background: #262626;
+  background-image:
+    linear-gradient(#262626, #262626),
+    linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
   box-shadow: inset 0 6px 14px rgba(0,0,0,0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  
-  /* Transition for a smoother effect */
-  transition: background 0.4s ease, border 0.4s ease;
 }
 
 .small-square svg {
   display: block;
-  max-width: 80%; /* or 100% */
+  max-width: 80%;
   height: auto;
-  /* margin removed because flex centering handles it */
 }
 
-.diagram-container.hovered .small-square {
-  border: 2px solid transparent; /* Hide the original border color */
-  /* Use two backgrounds:
-     - The first layer (inner) is #262626 color (the small square’s background).
-     - The second layer (outer) is the gradient for the border.
-  */
-  background-image:
-    linear-gradient(#262626, #262626),
-    linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
-  background-origin: border-box;
-  /* The first layer is clipped to the padding-box (the “inside”),
-     while the second covers the entire border box. */
-  background-clip: padding-box, border-box;
-  transition: border 0.4s ease;
-}
-
-/* Middle area: arcs & center box side by side */
+/* Middle area: arcs & center-box side by side */
 .middle-area {
   width: 100%;
   display: flex;
@@ -130,11 +109,14 @@ html, body {
   gap: 10px;
 }
 
-/* Center box: 192.41×304.27 */
+/* Center-box: 306×375; 2-column grid */
 .center-box {
+  position: relative;
   width: 306px;
   height: 375px;
-  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 /* Flip the left arc horizontally */
@@ -142,34 +124,25 @@ html, body {
   transform: scaleX(-1);
 }
 
-/* Right panel: 445 wide, 551 tall => fits container's 3rd column */
+/* Right panel & scroller */
 .right-panel {
+  position: relative;
   right: 60px;
   width: 425px;
   height: 551px;
   overflow: hidden;
-  position: relative;
 }
 
-/* The scroller is paused by default; unpause when .hovered is set */
 .right-scroll {
   position: absolute;
   top: 0;
   left: 0;
   width: 392px;
   animation: scrollBoxes 15s linear infinite;
-  animation-play-state: paused;
+  animation-play-state: running; /* always running now */
 }
 
-/* 
-   Instead of :hover => .diagram-container.hovered 
-   => unpause scrolling
-*/
-.diagram-container.hovered .right-scroll {
-  animation-play-state: running;
-}
-
-/* Each right box: 392×177, margin-bottom=10, plus top label + squares */
+/* Right boxes */
 .right-box {
   width: 392px;
   height: 177px;
@@ -178,23 +151,24 @@ html, body {
   flex-direction: column;
   padding: 10px 8px;
 }
+
 .right-box:last-child {
   margin-bottom: 0;
 }
 
-/* The top text in each right box */
+/* Gradient header text by default */
 .right-box-header {
+  width: 100%;
   text-align: center;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 16px;
-  color: #8E8E8E;
-  letter-spacing: -0.02em;
-  margin-bottom: 8px;
-  width: 100%;
+  background: linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Squares pinned at bottom of each right box */
 .right-box-content {
   flex: 1;
   display: flex;
@@ -204,252 +178,67 @@ html, body {
   padding-bottom: 20px;
 }
 
-.diagram-container.hovered .right-box-header {
-  background: linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transition: color 0.4s ease;
-}
-
-/* The vertical scrolling animation */
+/* Vertical scrolling animation */
 @keyframes scrollBoxes {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(0, -50%);
-  }
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(0, -50%); }
 }
 
-/* The below-svg slides up on .diagram-container.hovered (instead of :hover) */
-.below-svg {
-  position: absolute;
-  left: 44.75%;
-  transform: translateX(-50%);
-  top: 525px;
-  transition: top 0.5s ease;
-  z-index: 999;
-  border: 2px solid transparent;
-  border-radius: 24px;
-  background-image: 
-    linear-gradient(#262626, #262626), /* inner fill, matching your SVG rect fill */
-    linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-}
-.diagram-container.hovered .below-svg {
-  top: 475px;
-}
+/* ==== Center-area sub-boxes ==== */
 
-/* 35×39 center icon is hidden until .hovered */
-.center-hover-svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.75);
-  opacity: 0;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.diagram-container.hovered .center-hover-svg {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.diagram-container.hovered .left-box,
-.diagram-container.hovered .center-box,
-.diagram-container.hovered .right-box {
-  border: 2px solid transparent; /* Hide the original border color */
-  /* Use two backgrounds:
-     - The first layer (inner) is your #1c1c1c color.
-     - The second layer (outer) is the gradient for the border.
-  */
-  background-image: 
-    linear-gradient(#1c1c1c, #1c1c1c),
-    linear-gradient(to right, #84ABE5 0%, #74B2E4 24%, #60BAE3 49%, #4CC1E2 74%, #39C9E1 100%);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-}
-
-
-.above-svg {
-  position: absolute;
-  left: 44.5%;
-  transform: translateX(-50%);
-  top: 510px; /* initial position, adjust as needed */
-  z-index: 1000;
-  transition: top 0.5s ease;
-}
-
-.above-svg svg {
-  width: 45px;
-  height: auto;
-}
-
-.diagram-container.hovered .above-svg {
-  top: 460px; /* new position on hover, adjust as needed */
-}
-
-.diagram-container.hovered .left-box svg path {
-  fill: url(#hoverGradientIcon) !important;
-  transition: fill 0.4s ease;
-}
-
-/* Base style for all boxes inside dashboard */
+/* Shared base for all 11 sub-boxes */
 .center-sub-box {
   position: absolute;
-  background: #404040;
-  /* border: 2px solid #444; */
-  border-radius: 8px;  
-  box-sizing: border-box;
-  transition: border 0.4s ease, background 0.4s ease;
-}
-
-/* Unique sizes and positions for each box inside the "Dashboard" */
-.box1 {  /* Fat twin */
   width: 134px;
   height: 47px;
-  top: 80px;
-  left: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-}
-
-.center-sub-box {
+  background: #262626;
+  border-radius: 8px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding: 11px 10px;       /* 11px top/bottom, 10px left/right */
-  gap: 3px;                 /* space between icon and text */
-  background: #262626;
-  /* border: 2px solid #444;
-  border-radius: 8px;
-  box-sizing: border-box; */
+  padding: 11px 10px;
+  gap: 3px;
 }
+
 .center-sub-box svg {
   flex-shrink: 0;
   width: 26px;
   height: 25px;
   margin-top: 8px;
 }
-.box-text {
+
+.center-sub-box .box-text {
   color: #c4c4c4;
   font-size: 12px;
   line-height: 1.2;
   font-weight: 500;
-  /* allow multi-line wrapping if you need two lines: */
   white-space: normal;
 }
 
-.center-box {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;               /* vertical + horizontal gap */
-  /* padding on .center-box if you need extra breathing room */
-}
-
-/* make the header span both columns */
+/* Top-box spans both columns */
 .top-box {
-  grid-column: 1 / -1;     /* full width */
-  justify-content: center; /* center the text in the flexbox */
-}
-
-/* override the default gap for the header, if you like */
-.top-box {
-  padding: 11px 10px;      /* same 11/10 you used on the others */
-}
-
-.box2 { /* Dumb */
-  width: 134px;
-  height: 47px;
-  top: 80px;
-  right: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-}
-
-.box3 { /* Dumber */
-  width: 134px;
-  height: 47px;
-  top: 138px;
-  right: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-}
-
-.top-box { /* Big box*/
-  width: 277px;
+  grid-column: 1 / -1;
+  justify-content: center;
+  width: 275px;
   height: 54px;
   top: 4%;
   left: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
   background-color: #262626;
+  box-shadow: inset 0 4px 4px rgba(0,0,0,0.25);
+  padding: 11px 10px;
   font-family: inter;
   font-weight: 500;
   font-size: 13px;
 }
 
-.box5 { /* Twins */
-  width: 134px;
-  height: 47px;
-  top: 138px;
-  left: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-  background-color: #262626;
-}
-
-.box6 { /* Twins */
-  width: 134px;
-  height: 47px;
-  top: 196px;
-  right: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-  background-color: #262626;
-}
-
-.box7 { /* Twins */
-  width: 134px;
-  height: 47px;
-  top: 196px;
-  left: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-  background-color: #262626;
-}
-
-.box8 { /* Twins */
-  width: 134px;
-  height: 47px;
-  top: 254px;
-  left: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-  background-color: #262626;
-}
-
-.box9 { /* Twins */
-  width: 134px;
-  height: 47px;
-  top: 254px;
-  right: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-  background-color: #262626;
-}
-
-.box10 { /* Twins */
-  width: 134px;
-  height: 47px;
-  top: 312px;
-  right: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-  background-color: #262626;
-}
-
-.box11 { /* Twins */
-  width: 134px;
-  height: 47px;
-  top: 312px;
-  left: 15px;
-  box-shadow: inset 0px 4px 4px 0px rgba(0,0,0,0.25);
-  background-color: #262626;
-}
-/* On hover: change sub-box borders to gradient */
-.diagram-container.hovered .center-box .center-sub-box {
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-}
-
+/* Individual positions for sub-boxes */
+.box1  { top: 80px;  left: 15px; }
+.box2  { top: 80px;  right: 15px; }
+.box3  { top: 138px; right: 15px; }
+.box5  { top: 138px; left: 15px; }
+.box6  { top: 196px; right: 15px; }
+.box7  { top: 196px; left: 15px; }
+.box8  { top: 254px; left: 15px; }
+.box9  { top: 254px; right: 15px; }
+.box10 { top: 312px; right: 15px; }
+.box11 { top: 312px; left: 15px; }
